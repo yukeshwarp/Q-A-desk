@@ -7,7 +7,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from dotenv import load_dotenv
-from langchain_community.retrievers import ParentDocumentRetriever
 from langchain_community.stores import InMemoryDocstore
 
 # Load environment variables from .env file
