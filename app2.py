@@ -23,6 +23,7 @@ os.environ["AZURE_OPENAI_API_KEY"] = azure_api_key
 os.environ["AZURE_OPENAI_ENDPOINT"] = azure_endpoint
 os.environ["OPENAI_API_TYPE"] = azure_api_type
 os.environ["OPENAI_API_VERSION"] = azure_api_version
+llm = AzureChatOpenAI(deployment_name="gpt-4o-mini")
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_path):
@@ -94,8 +95,6 @@ def main():
  
         st.success('PDF processed. You can now ask questions!')
  
-        # Azure OpenAI and prompt settings
-        llm = AzureChatOpenAI(deployment_name="gpt-4o-mini")
         prompt_template = """Answer the question as precise as possible using the provided context. If the answer is
                             not contained in the context, say "answer not available in context" \n\n
                             Context: \n {context}?\n
