@@ -7,8 +7,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from dotenv import load_dotenv
-from langchain.retrievers import ParentDocumentRetriever
-from langchain.storage import InMemoryStore
+from langchain_core.retrievers import ParentDocumentRetriever
+from langchain_core.storage import InMemoryStore
 
 # Load environment variables from .env file
 load_dotenv()
@@ -82,7 +82,7 @@ def main():
                     chunk_with_metadata.append((chunk, {"subject": "No subject", "author": "No author"}))
                 metadata_index += 1
 
-            # Initialize HuggingFace Embeddings & FAISS once
+            # Initialize HuggingFace Embeddings & FAISS
             embeddings = AzureOpenAIEmbeddings(
                 model="text-embedding-3-large",
                 deployment="TextEmbeddingLarge",
@@ -94,10 +94,10 @@ def main():
             # Create a vector store with metadata
             vectorstore = FAISS.from_texts([c[0] for c in chunk_with_metadata], embedding=embeddings)
             
-            # Initialize InMemoryDocstore to store documents with metadata
-            store = InMemoryDocstore()
+            # Initialize InMemoryStore to store documents with metadata
+            store = InMemoryStore()
             for i, (chunk, meta) in enumerate(chunk_with_metadata):
-                store.add_document(doc_id=str(i), text=chunk, metadata=meta)
+                store.add_document(doc_id=str(i), document=Document(page_content=chunk, metadata=meta))
             
             # Initialize ParentDocumentRetriever
             child_splitter = RecursiveCharacterTextSplitter(
