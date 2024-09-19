@@ -24,10 +24,9 @@ os.environ["AZURE_OPENAI_ENDPOINT"] = azure_endpoint
 os.environ["OPENAI_API_TYPE"] = azure_api_type
 os.environ["OPENAI_API_VERSION"] = azure_api_version
 
-# Function to extract text and metadata from PDF
-def extract_text_and_metadata_from_pdf(pdf_path):
+# Function to extract text from PDF
+def extract_text_from_pdf(pdf_path):
     all_text = ""
-    metadata = []
     with open(pdf_path, 'rb') as file:
         reader = PyPDF2.PdfReader(file)
         number_of_pages = len(reader.pages)
@@ -35,17 +34,16 @@ def extract_text_and_metadata_from_pdf(pdf_path):
             page = reader.pages[page_num]
             page_text = page.extract_text()
             all_text += page_text
-            
-            # Extracting metadata if available
-            page_metadata = {
-                "page_num": page_num,
-                "title": reader.get_metadata().get("title", "Unknown Title"),
-                "author": reader.get_metadata().get("author", "Unknown Author"),
-                "subject": reader.get_metadata().get("subject", "Unknown Subject"),
-                "keywords": reader.get_metadata().get("keywords", "Unknown Keywords"),
-            }
-            metadata.append(page_metadata)
-    return all_text, metadata
+    return all_text
+
+# Function to extract metadata for a chunk
+def extract_metadata_from_chunk(chunk_text):
+    prompt_template2 = """extract the metadata from the following chunk of document:{chunk_text}"""
+    promptr = PromptTemplate.from_template(template=prompt_template2)
+    prompt_input = prompt.format(chunk_text=chunk_text)
+    response = llm.invoke(promptr)
+    metadata = response.content
+    return metadata
 
 # Function to format the retrieved documents into a single string
 def format_docs(docs):
@@ -65,8 +63,8 @@ def main():
             with open(pdf_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
            
-            # Extract text and metadata from the PDF
-            all_text, metadata = extract_text_and_metadata_from_pdf(pdf_path)
+            # Extract text from the PDF
+            all_text = extract_text_from_pdf(pdf_path)
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000,
                 chunk_overlap=200,
@@ -75,9 +73,6 @@ def main():
             )
             chunks = text_splitter.split_text(text=all_text)
             
-            # Attach metadata to chunks
-            chunks_with_metadata = [{"text": chunk, "metadata": metadata[i % len(metadata)]} for i, chunk in enumerate(chunks)]
-
             # Initialize HuggingFace Embeddings & FAISS once
             embeddings = AzureOpenAIEmbeddings(
                 model="text-embedding-3-large",
@@ -86,11 +81,19 @@ def main():
                 azure_endpoint=azure_endpoint,
                 openai_api_key=azure_api_key
             )
-            vectorstore = FAISS.from_texts([chunk['text'] for chunk in chunks_with_metadata], embedding=embeddings)
+            
+            # Create metadata for each chunk
+            chunk_with_metadata = []
+            for chunk in chunks:
+                metadata = extract_metadata_from_chunk(chunk)
+                chunk_with_metadata.append((chunk, metadata))
+            
+            # Create a vector store with metadata
+            vectorstore = FAISS.from_texts([c[0] for c in chunk_with_metadata], embedding=embeddings)
             retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
-
+ 
         st.success('PDF processed. You can now ask questions!')
-
+ 
         # Azure OpenAI and prompt settings
         llm = AzureChatOpenAI(deployment_name="gpt-4o-mini")
         prompt_template = """Answer the question as precise as possible using the provided context. If the answer is
@@ -99,7 +102,7 @@ def main():
                             Question: \n {question} \n
                             Answer:"""
         prompt = PromptTemplate.from_template(template=prompt_template)
-
+ 
         # Q&A Interaction
         user_input = st.text_input("Ask your question:")
         if st.button("Submit") and user_input:
