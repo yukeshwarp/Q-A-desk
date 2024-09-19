@@ -13,11 +13,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get Azure OpenAI environment variables from .env file
-azure_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+azure_api_key = os.getenv("OPENAI_API_KEY")
+azure_endpoint = os.getenv("OPENAI_API_BASE")
 azure_api_type = os.getenv("OPENAI_API_TYPE")
-azure_api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-
+azure_api_version = os.getenv("OPENAI_API_VERSION")
+MODEL_NAME = "gpt-4o-mini"
+DEPLOYMENT_NAME = "gpt-4o-mini"
 # Set environment variables in current environment (if needed)
 os.environ["AZURE_OPENAI_API_KEY"] = azure_api_key
 os.environ["AZURE_OPENAI_ENDPOINT"] = azure_endpoint
