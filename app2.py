@@ -40,9 +40,9 @@ def extract_text_from_pdf(pdf_path):
 def extract_metadata_from_chunk(chunk_text):
     prompt_template2 = """extract the metadata from the following chunk of document:{chunk_text}"""
     promptr = PromptTemplate.from_template(template=prompt_template2)
-    prompt_input = prompt.format(chunk_text=chunk_text)
-    response = llm.invoke(promptr)
-    metadata = response.content
+    prompt_inputr = promptr.format(chunk_text=chunk_text)
+    responser = llm.invoke(prompt_inputr)
+    metadata = responser.content
     return metadata
 
 # Function to format the retrieved documents into a single string
