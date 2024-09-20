@@ -52,14 +52,15 @@ def format_docs(docs):
 
 # Streamlit app
 def main():
-    st.title("PDF Q&A Chatbot")
+    st.title("AskPDF - Document explorer")
+    st.write("Your document exploration partner.")
 
     # Upload a PDF
     uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
 
     if uploaded_file:
         # Process the PDF and split into chunks only once
-        with st.spinner('Processing PDF...'):
+        with st.spinner('Processing ...'):
             pdf_path = "temp_uploaded_pdf.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
@@ -93,7 +94,7 @@ def main():
             vectorstore = FAISS.from_texts([c[0] for c in chunk_with_metadata], embedding=embeddings)
             retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 4})
  
-        st.success('PDF processed. You can now ask questions!')
+        st.success('Your document is ready to be explored, post your questions!')
  
         prompt_template = """Answer the question as precise as possible using the provided context. If the answer is
                             not contained in the context, say "answer not available in context" \n\n
@@ -104,7 +105,7 @@ def main():
  
         # Q&A Interaction
         user_input = st.text_input("Ask your question:")
-        if st.button("Submit") and user_input:
+        if st.button("Ask") and user_input:
             # Retrieve relevant chunks
             with st.spinner('Fetching the answer...'):
                 relevant_docs = retriever.invoke(user_input)
@@ -115,7 +116,7 @@ def main():
                
                 # Get response from the LLM
                 response = llm.invoke(prompt_input)
-                st.write(f"**Answer:** {response.content}")
+                st.write(f"**Here's what I've found:** {response.content}")
 
 if __name__ == "__main__":
     main()
