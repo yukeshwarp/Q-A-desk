@@ -67,8 +67,8 @@ def main():
             # Extract text from the PDF
             all_text = extract_text_from_pdf(pdf_path)
             text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=1000,
-                chunk_overlap=200,
+                chunk_size=2000,
+                chunk_overlap=500,
                 length_function=len,
                 separators=['\n', '\n\n', ' ', '']
             )
@@ -95,11 +95,18 @@ def main():
  
         st.success('Your document is ready to be explored, post your questions!')
  
-        prompt_template = """Answer the question as precise as possible using the provided context. If the answer is
-                            not contained in the context, say "answer not available in context" \n\n
-                            Context: \n {context}?\n
-                            Question: \n {question} \n
-                            Answer:"""
+        prompt_template = """Using the provided context, answer the question in a detailed and comprehensive manner. 
+                             Make sure your response fully addresses the question and provides as much relevant information as possible. 
+                             If the answer is not available in the context, respond with 'Answer not available in context.' 
+                             Do not shorten or omit any important details from the answer.
+
+                             Context:
+                             {context}
+
+                             Question:
+                             {question}
+
+                             Answer:"""
         prompt = PromptTemplate.from_template(template=prompt_template)
  
         # Q&A Interaction
