@@ -50,7 +50,8 @@ def format_docs(docs):
 
 # Streamlit app
 def main():
-    st.title("PDF Q&A Chatbot")
+    st.title("AskPDF - Document explorer")
+    st.write("Your document exploration partner.")
 
     # Upload a PDF
     uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
@@ -123,7 +124,7 @@ def main():
                 document = Document(page_content=chunk, metadata=meta)
                 retriever.add_documents([document], ids=None)
             
-        st.success('PDF processed. You can now ask questions!')
+        st.success('Your document is ready to be explored, post your questions!')
  
         # Azure OpenAI and prompt settings
         llm = AzureChatOpenAI(deployment_name="gpt-4o-mini")
@@ -136,7 +137,7 @@ def main():
  
         # Q&A Interaction
         user_input = st.text_input("Ask your question:")
-        if st.button("Submit") and user_input:
+        if st.button("Ask") and user_input:
             # Retrieve relevant chunks
             with st.spinner('Fetching the answer...'):
                 retrieved_docs = retriever.invoke(user_input)
@@ -147,7 +148,7 @@ def main():
                
                 # Get response from the LLM
                 response = llm.invoke(prompt_input)
-                st.write(f"**Answer:** {response.content}")
+                st.write(f"**Here's what I've found:** {response.content}")
 
 if __name__ == "__main__":
     main()
