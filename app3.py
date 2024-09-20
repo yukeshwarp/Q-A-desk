@@ -58,7 +58,7 @@ def main():
 
     if uploaded_file:
         # Process the PDF and split into chunks only once
-        with st.spinner('Processing PDF...'):
+        with st.spinner('Processing ...'):
             pdf_path = "temp_uploaded_pdf.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
