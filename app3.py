@@ -95,15 +95,16 @@ def main():
             vectorstore = FAISS.from_texts([c[0] for c in chunk_with_metadata], embedding=embeddings)
             
             # Initialize InMemoryStore to store documents with metadata
+            # Initialize InMemoryStore to store documents with metadata
+            store = InMemoryStore()
 
-            
             # Initialize ParentDocumentRetriever
             child_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=500,
                 chunk_overlap=100,
                 length_function=len,
                 separators=['\n', '\n\n', ' ', '']
-            )
+                )
             parent_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=2000,
                 chunk_overlap=500,
@@ -116,10 +117,12 @@ def main():
                 child_splitter=child_splitter,
                 parent_splitter=parent_splitter,
             )
-            store = InMemoryStore()
+            
+            # Add documents to retriever
             for i, (chunk, meta) in enumerate(chunk_with_metadata):
-                retriever.add_documents(docs, ids=None, document=Document(page_content=chunk, metadata=meta))
-                
+                document = Document(page_content=chunk, metadata=meta)
+                retriever.add_documents([document], ids=None)
+            
         st.success('PDF processed. You can now ask questions!')
  
         # Azure OpenAI and prompt settings
