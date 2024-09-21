@@ -134,8 +134,7 @@ def main():
         llm = AzureChatOpenAI(deployment_name="gpt-4o-mini")
         prompt_template = """Using the provided context, answer the question in a detailed and comprehensive manner. 
                              Make sure your response fully addresses the question and provides as much relevant information as possible. 
-                             If the answer is not available in the context, respond with 'Answer not available in context.' 
-                             Do not shorten or omit any important details from the answer.
+                             If the answer is not available in the context, respond with 'Answer not available in context.'
 
                              Context:
                              {context}
