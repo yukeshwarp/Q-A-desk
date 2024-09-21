@@ -7,3 +7,4 @@ faiss-cpu
 python-dotenv
 openai
 langchain-core
+langchain-text-splitters
