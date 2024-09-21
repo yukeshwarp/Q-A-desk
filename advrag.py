@@ -134,7 +134,8 @@ def main():
         llm = AzureChatOpenAI(deployment_name="gpt-4o-mini")
         prompt_template = """Using the provided context, answer the question in a detailed and comprehensive manner. 
                              Make sure your response fully addresses the question and provides as much relevant information as possible. 
-                             If the answer is not available in the context, respond with 'Answer not available in context.'
+                             If the answer is not available in the context, respond with 'Answer not available in context.' 
+                             Do not shorten or omit any important details from the answer.
 
                              Context:
                              {context}
@@ -155,10 +156,16 @@ def main():
                
                 # Prepare the input for AzureChatOpenAI
                 prompt_input = prompt.format(context=context, question=user_input)
-               
-                # Get response from the LLM
-                response = llm.invoke(prompt_input)
-                st.write(f"**Here's what I've found:** {response.content}")
+                
+                # Fetch the response, handle Azure content filter errors
+                try:
+                    response = llm.invoke(prompt_input)
+                    st.write(f"**Here's what I've found:** {response.content}")
+                except ValueError as e:
+                    if "content filter" in str(e):
+                        st.write("Azure has blocked the response due to content filtering. Please try rephrasing your question.")
+                    else:
+                        st.write(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
     main()
